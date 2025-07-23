@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Генератор</title>
+    <style>
+        html {
+            margin: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            flex-direction: column;
+            overflow: hidden; /* <--- ВАЖНО: убирает полосу прокрутки */
+        }
+
+        input, button {
+            font-size: 32px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #444;
+            color: white;
+        }
+
+        input:focus, button:hover {
+            outline: none;
+            background-color: #555;
+        }
+
+        #startScreen, #rollScreen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #rollScreen.active, #startScreen.active {
+            display: flex;
+        }
+
+        #digits {
+            font-size: 600px;
+            font-weight: 900;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            letter-spacing: 20px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #digits span {
+            width: 0.6em; /* фиксированная ширина символа */
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div id="startScreen" class="active">
+    <label for="maxValue" style="font-size: 36px; margin-bottom: 10px;">Максимальное число:</label>
+    <input type="number" id="maxValue" min="1" value="999"/>
+    <button onclick="startRolling()">Начать</button>
+</div>
+
+<div id="rollScreen">
+    <div id="digits">
+        <span>0</span>
+        <span>0</span>
+        <span>0</span>
+    </div>
+</div>
+
+<script>
+    let max = 999;
+    let interval;
+    let fixedDigits = 0;
+    let currentDigits = [0, 0, 0];
+
+    const startScreen = document.getElementById('startScreen');
+    const rollScreen = document.getElementById('rollScreen');
+    const digitsEl = document.getElementById('digits');
+
+    function startRolling() {
+        max = parseInt(document.getElementById('maxValue').value);
+        if (isNaN(max) || max < 1 || max > 999) {
+            alert("Введите число от 1 до 999");
+            return;
+        }
+
+        startScreen.classList.remove('active');
+        rollScreen.classList.add('active');
+        fixedDigits = 0;
+        currentDigits = [0, 0, 0];
+
+        interval = setInterval(rollDigits, 50);
+    }
+
+    function rollDigits() {
+        for (let i = fixedDigits; i < 3; i++) {
+            currentDigits[i] = Math.floor(Math.random() * 10);
+        }
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        digitsEl.textContent = currentDigits.join('');
+        if (parseInt(digitsEl.textContent) > max) {
+            rollDigits(); // skip invalid numbers
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            if (fixedDigits < 3) {
+                fixedDigits++;
+                if (fixedDigits === 3) clearInterval(interval);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
